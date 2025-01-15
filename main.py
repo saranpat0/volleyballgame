@@ -8,6 +8,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.togglebutton import ToggleButton
 from kivy.clock import Clock
 from kivy.vector import Vector
+from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 
 class Paddle(Widget):
     score = NumericProperty(0)
