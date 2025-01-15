@@ -6,10 +6,23 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.togglebutton import ToggleButton
+from kivy.clock import Clock
+from kivy.vector import Vector
 
 class Paddle(Widget):
     score = NumericProperty(0)
+
+    def bounce_ball(self, ball):
+        if self.collide_widget(ball):
+            ball.velocity_x *= -1.1
 class Ball(Widget):
     velocity_x = NumericProperty(0)
     velocity_y = NumericProperty(0)
     velocity = ObjectProperty(Vector(0, 0))
+    def move(self):
+        self.pos = Vector(*self.velocity) + self.pos
+class VolleyballGame(Widget):
+    ball = ObjectProperty(None)
+    player1 = ObjectProperty(None)
+    player2 = ObjectProperty(None)
+    status_label = ObjectProperty(None)
