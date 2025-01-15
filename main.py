@@ -11,7 +11,6 @@ from kivy.vector import Vector
 
 class Paddle(Widget):
     score = NumericProperty(0)
-
     def bounce_ball(self, ball):
         if self.collide_widget(ball):
             ball.velocity_x *= -1.1
@@ -21,8 +20,9 @@ class Ball(Widget):
     velocity = ObjectProperty(Vector(0, 0))
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
-class VolleyballGame(Widget):
-    ball = ObjectProperty(None)
-    player1 = ObjectProperty(None)
-    player2 = ObjectProperty(None)
-    status_label = ObjectProperty(None)
+class VollyeballGame(Widget):
+    pass
+class menu(Boxlayout):
+    pass
+class VolleyballApp(App):
+    pass
