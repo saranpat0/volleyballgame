@@ -6,6 +6,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.vector import Vector
 from kivy.clock import Clock
 from kivy.graphics import Rectangle, Color, Ellipse
+from kivy.core.window import Window
 
 class Paddle(Widget):
     def __init__(self, **kwargs):
@@ -33,6 +34,12 @@ class Paddle(Widget):
     def jump(self):
         if self.y == 0:
             self.velocity.y = self.jump_strength
+
+    def move_left(self):
+        self.x -= 10
+
+    def move_right(self):
+        self.x += 10
 
 class Ball(Widget):
     def __init__(self, **kwargs):
@@ -81,6 +88,8 @@ class VolleyballGame(Widget):
         self.bind(size=self._update_bg, pos=self._update_bg)
         self.bind(size=self._update_positions)
 
+        Window.bind(on_key_down=self.on_key_down)
+
     def _update_bg(self, *args):
         self.bg.size = self.size
         self.bg.pos = self.pos
@@ -117,11 +126,19 @@ class VolleyballGame(Widget):
 
         self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
 
-    def on_touch_down(self, touch):
-        if touch.x < self.width / 2:
+    def on_key_down(self, window, key, *args):
+        if key == 119:  # W key
             self.player1.jump()
-        else:
+        elif key == 97:  # A key
+            self.player1.move_left()
+        elif key == 100:  # D key
+            self.player1.move_right()
+        elif key == 273:  # Up arrow key
             self.player2.jump()
+        elif key == 276:  # Left arrow key
+            self.player2.move_left()
+        elif key == 275:  # Right arrow key
+            self.player2.move_right()
 
 class VolleyballApp(App):
     def build(self):
@@ -134,13 +151,13 @@ class VolleyballApp(App):
             size_hint=(1, None),
             height=50,
             pos=(0, 0),
-            on_press=lambda x: self.start_game()
+            on_press=self.start_game
         )
         root.add_widget(self.start_button)
 
         return root
 
-    def start_game(self):
+    def start_game(self, instance):
         self.game.serve_ball()
         Clock.unschedule(self.game.update)
         Clock.schedule_interval(self.game.update, 1.0 / 60.0)
