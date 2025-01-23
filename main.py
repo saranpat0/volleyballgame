@@ -72,7 +72,7 @@ class MenuScreen(BoxLayout):
         self.orientation = 'vertical'
         self.start_game_callback = start_game_callback
         self.add_widget(Label(text="Volleyball Game!", font_size=32))
-        self.add_widget(Button(text="Start Game", on_press=self.start_game_callback))
+        self.add_widget(Button(text="Start Game", on_press=partial(self.start_game_callback)))
         self.add_widget(Button(text="Quit", on_press=lambda x: App.get_running_app().stop()))
 class VolleyballApp(App):
     def build(self):
