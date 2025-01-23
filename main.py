@@ -23,18 +23,15 @@ class Ball(Widget):
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
 class VolleyballGame(Widget):
-    ball = ObjectProperty(None)
-    player1 = ObjectProperty(None)
-    player2 = ObjectProperty(None)
-    status_label = ObjectProperty(None)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+      super().__init__(**kwargs)
         self.ball = Ball()
         self.player1 = Paddle(pos=(10, self.center_y))
         self.player2 = Paddle(pos=(self.width - 30, self.center_y))
+        self.status_label = Label(text="Press Start to Play", font_size=24)
         self.add_widget(self.ball)
         self.add_widget(self.player1)
         self.add_widget(self.player2)
+        self.add_widget(self.status_label)
 
     def serve_ball(self, velocity=(4, 0)):
         self.ball.velocity_x, self.ball.velocity_y = velocity
