@@ -26,7 +26,39 @@ class VollyeballGame(Widget):
     player1 = ObjectProperty(None)
     player2 = ObjectProperty(None)
     status_label = ObjectProperty(None)
-class menu(Boxlayout):
+
+    def serve_ball(self, velocity=(4, 0)):
+        self.ball.velocity = Vector(*velocity)
+        self.status_label.text = "Game On!"
+
+    def update(self, dt):
+        self.ball.move()
+
+        # Bounce off paddles
+        self.player1.bounce_ball(self.ball)
+        self.player2.bounce_ball(self.ball)
+
+        # Bounce off top and bottom
+        if (self.ball.y < 0) or (self.ball.top > self.height):
+            self.ball.velocity_y *= -1
+
+        # Score points
+        if self.ball.x < self.x:
+            self.player2.score += 1
+            self.serve_ball(velocity=(4, 0))
+            self.status_label.text = f"Player 2 scores! Total: {self.player2.score}"
+        if self.ball.x > self.width:
+            self.player1.score += 1
+            self.serve_ball(velocity=(-4, 0))
+            self.status_label.text = f"Player 1 scores! Total: {self.player1.score}"
+
+    def on_touch_move(self, touch):
+        if touch.x < self.width / 3:
+            self.player1.center_y = touch.y
+        if touch.x > self.width * 2 / 3:
+            self.player2.center_y = touch.y
+
+class MenuScreen(Boxlayout):
     def __init__(self, call_gamestart, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
