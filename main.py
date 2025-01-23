@@ -1,31 +1,36 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
-from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.textinput import TextInput
-from kivy.uix.togglebutton import ToggleButton
-from kivy.clock import Clock 
+from kivy.uix.image import Image
 from kivy.vector import Vector
-from functools import partial
+from kivy.clock import Clock
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.togglebutton import ToggleButton
 
 class Paddle(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.score = 0  # ใช้ตัวแปรปกติแทน NumericProperty
-        self.size = (20, 100)  # กำหนดขนาดให้ Paddle
+        self.velocity = Vector(0, 0)  # ใช้สำหรับการกระโดด
+        self.gravity = -0.5  # แรงโน้มถ่วง
+        self.jump_strength = 10
 
-    def bounce_ball(self, ball):
-        if self.collide_widget(ball):
-            ball.velocity[0] *= -1.1  # เปลี่ยนจาก velocity_x เป็น velocity[0]
+    def move(self):
+        self.velocity.y += self.gravity
+        self.y += self.velocity.y
+        if self.y < 0:  # ไม่ให้หลุดล่าง
+            self.y = 0
+            self.velocity.y = 0
+
+    def jump(self):
+        if self.y == 0:  # กระโดดได้เฉพาะบนพื้น
+            self.velocity.y = self.jump_strength
 
 class Ball(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.velocity = Vector(4, 4)  # ให้มีความเร็วเริ่มต้น
-        self.size = (30, 30)  # กำหนดขนาดให้ Ball
-        self.center = (300, 300)  # ให้เริ่มต้นอยู่ตรงกลาง
+        self.velocity = Vector(6, 6)
 
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
@@ -33,89 +38,67 @@ class Ball(Widget):
 class VolleyballGame(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.ball = Ball()
-        self.player1 = Paddle(pos=(10, self.center_y))
-        self.player2 = Paddle(pos=(self.width - 30, self.center_y))
-        self.status_label = Label(text="Press Start to Play", font_size=24)
+        self.ball = Ball(size=(30, 30), center=self.center)
+        self.player1 = Paddle(size=(50, 50), pos=(50, 0))
+        self.player2 = Paddle(size=(50, 50), pos=(self.width - 100, 0))
+        self.net = Widget(size=(10, self.height), pos=(self.center_x - 5, 0))  # ตาข่าย
 
-        # เพิ่ม Widget เข้าไปใน Layout
         self.add_widget(self.ball)
         self.add_widget(self.player1)
         self.add_widget(self.player2)
-        self.add_widget(self.status_label)
+        self.add_widget(self.net)
 
-    def serve_ball(self, velocity=(4, 4)):
-        self.ball.velocity = Vector(*velocity)  # ใช้ Vector ตรงๆ แทนการกำหนดแยก x, y
-        self.ball.center = self.center  # ให้เริ่มต้นจากตรงกลาง
-        self.status_label.text = "Game On!"
+        self.score_label = Label(text="Player 1: 0 | Player 2: 0", size_hint=(1, None), height=50)
+        self.add_widget(self.score_label)
+
+        self.player1_score = 0
+        self.player2_score = 0
+
+    def serve_ball(self, velocity=(6, 6)):
+        self.ball.center = self.center
+        self.ball.velocity = Vector(*velocity)
 
     def update(self, dt):
         self.ball.move()
-        print(f"Ball Position: {self.ball.pos}")  # Debug เช็คตำแหน่งบอล
+        self.player1.move()
+        self.player2.move()
 
-        self.player1.bounce_ball(self.ball)
-        self.player2.bounce_ball(self.ball)
+        # Bounce off walls
+        if self.ball.top > self.height or self.ball.y < 0:
+            self.ball.velocity.y *= -1
 
-        # Bounce off top and bottom
-        if (self.ball.y < 0) or (self.ball.top > self.height):
-            self.ball.velocity[1] *= -1  # แก้ให้ใช้ Vector[1] แทน velocity_y
+        # Bounce off paddles
+        if self.ball.collide_widget(self.player1) or self.ball.collide_widget(self.player2):
+            self.ball.velocity.x *= -1.1
+            self.ball.velocity.y *= 1.1
 
         # Score points
-        if self.ball.x < self.x:
-            self.player2.score += 1
-            self.serve_ball(velocity=(4, 4))
-            self.status_label.text = f"Player 2 scores! Total: {self.player2.score}"
+        if self.ball.x < 0:
+            self.player2_score += 1
+            self.serve_ball(velocity=(6, 6))
         if self.ball.x > self.width:
-            self.player1.score += 1
-            self.serve_ball(velocity=(-4, 4))
-            self.status_label.text = f"Player 1 scores! Total: {self.player1.score}"
+            self.player1_score += 1
+            self.serve_ball(velocity=(-6, 6))
 
-    def on_touch_move(self, touch):
-        if touch.x < self.width / 3:
-            self.player1.center_y = touch.y
-        if touch.x > self.width * 2 / 3:
-            self.player2.center_y = touch.y
+        self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
 
-class MenuScreen(BoxLayout):
-    def __init__(self, start_game_callback, open_settings_callback, **kwargs):
-        super().__init__(**kwargs)
-        self.orientation = 'vertical'
-        self.add_widget(Label(text="Volleyball Game!", font_size=32))
-        self.add_widget(Button(text="Start Game", on_press=start_game_callback))
-        self.add_widget(Button(text="Settings", on_press=open_settings_callback))
-        self.add_widget(Button(text="Quit", on_press=lambda x: App.get_running_app().stop()))
-
-class SettingsScreen(BoxLayout):
-    def __init__(self, back_callback, **kwargs):
-        super().__init__(**kwargs)
-        self.orientation = 'vertical'
-        self.add_widget(Label(text="Settings", font_size=24))
-        self.add_widget(Label(text="Volume"))
-        self.add_widget(ToggleButton(text="Mute"))
-        self.add_widget(Button(text="Back", on_press=back_callback))
+    def on_touch_down(self, touch):
+        if touch.x < self.width / 2:
+            self.player1.jump()
+        else:
+            self.player2.jump()
 
 class VolleyballApp(App):
     def build(self):
-        self.root_widget = BoxLayout(orientation='vertical')
-        self.menu = MenuScreen(start_game_callback=self.start_game, open_settings_callback=self.open_settings)
-        self.settings = SettingsScreen(back_callback=self.show_menu)
-        self.game = VolleyballGame()
-        self.show_menu()
-        return self.root_widget
-    
-    def show_menu(self, instance=None):
-        self.root_widget.clear_widgets()
-        self.root_widget.add_widget(self.menu)
-    
-    def open_settings(self, instance):
-        self.root_widget.clear_widgets()
-        self.root_widget.add_widget(self.settings)
+        root = FloatLayout()
+        game = VolleyballGame()
+        root.add_widget(game)
 
-    def start_game(self, instance):
-        self.root_widget.clear_widgets()
-        self.root_widget.add_widget(self.game)
-        self.game.serve_ball()
-        Clock.schedule_interval(self.game.update, 1.0 / 60.0)
+        start_button = Button(text="Start Game", size_hint=(1, None), height=50, on_press=lambda x: game.serve_ball())
+        root.add_widget(start_button)
+
+        Clock.schedule_interval(game.update, 1.0 / 60.0)
+        return root
 
 if __name__ == "__main__":
     VolleyballApp().run()
