@@ -11,10 +11,11 @@ from kivy.core.window import Window
 class Paddle(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.size = (50, 50)
+        self.size = (100, 100)
         self.velocity = Vector(0, 0)
         self.gravity = -0.5
         self.jump_strength = 10
+        self.speed = 25  # Speed of the player
         with self.canvas:
             Color(1, 0, 0)
             self.rect = Rectangle(size=self.size, pos=self.pos)
@@ -36,10 +37,10 @@ class Paddle(Widget):
             self.velocity.y = self.jump_strength
 
     def move_left(self):
-        self.x -= 10
+        self.x -= self.speed
 
     def move_right(self):
-        self.x += 10
+        self.x += self.speed
 
 class Ball(Widget):
     def __init__(self, **kwargs):
@@ -104,7 +105,9 @@ class VolleyballGame(Widget):
         self.bind(size=self._update_positions)
 
         Window.bind(on_key_down=self.on_key_down)
+        Window.bind(on_key_up=self.on_key_up)
 
+        self.keys_pressed = set()
         self.serving_player = 1  # Start with player 1 serving
 
     def _update_bg(self, *args):
@@ -153,8 +156,7 @@ class VolleyballGame(Widget):
 
         # Ball collision with paddles
         if self.ball.collide_widget(self.player1) or self.ball.collide_widget(self.player2):
-            self.ball.velocity.x *= -1.1
-            self.ball.velocity.y *= 1.1
+            self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
 
         self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
 
@@ -164,19 +166,47 @@ class VolleyballGame(Widget):
         if self.player2.collide_widget(self.net):
             self.player2.x = self.net.right
 
+        # Update player movements based on keys pressed
+        if 'w' in self.keys_pressed:
+            self.player1.jump()
+        if 'a' in self.keys_pressed:
+            self.player1.move_left()
+        if 'd' in self.keys_pressed:
+            self.player1.move_right()
+        if 'up' in self.keys_pressed:
+            self.player2.jump()
+        if 'left' in self.keys_pressed:
+            self.player2.move_left()
+        if 'right' in self.keys_pressed:
+            self.player2.move_right()
+
     def on_key_down(self, window, key, *args):
         if key == 119:  # W key
-            self.player1.jump()
+            self.keys_pressed.add('w')
         elif key == 97:  # A key
-            self.player1.move_left()
+            self.keys_pressed.add('a')
         elif key == 100:  # D key
-            self.player1.move_right()
+            self.keys_pressed.add('d')
         elif key == 273:  # Up arrow key
-            self.player2.jump()
+            self.keys_pressed.add('up')
         elif key == 276:  # Left arrow key
-            self.player2.move_left()
+            self.keys_pressed.add('left')
         elif key == 275:  # Right arrow key
-            self.player2.move_right()
+            self.keys_pressed.add('right')
+
+    def on_key_up(self, window, key, *args):
+        if key == 119:  # W key
+            self.keys_pressed.discard('w')
+        elif key == 97:  # A key
+            self.keys_pressed.discard('a')
+        elif key == 100:  # D key
+            self.keys_pressed.discard('d')
+        elif key == 273:  # Up arrow key
+            self.keys_pressed.discard('up')
+        elif key == 276:  # Left arrow key
+            self.keys_pressed.discard('left')
+        elif key == 275:  # Right arrow key
+            self.keys_pressed.discard('right')
 
 class VolleyballApp(App):
     def build(self):
