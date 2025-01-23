@@ -15,7 +15,7 @@ class Paddle(Widget):
         self.velocity = Vector(0, 0)
         self.gravity = -0.5
         self.jump_strength = 10
-        self.speed = 25  # Speed of the player
+        self.speed = 7  # Speed of the player
         with self.canvas:
             Color(1, 0, 0)
             self.rect = Rectangle(size=self.size, pos=self.pos)
@@ -37,10 +37,12 @@ class Paddle(Widget):
             self.velocity.y = self.jump_strength
 
     def move_left(self):
-        self.x -= self.speed
+        if self.x - self.speed >= 0:  # Prevent moving out of the left boundary
+            self.x -= self.speed
 
     def move_right(self):
-        self.x += self.speed
+        if self.right + self.speed <= self.parent.width:  # Prevent moving out of the right boundary
+            self.x += self.speed
 
 class Ball(Widget):
     def __init__(self, **kwargs):
