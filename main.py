@@ -13,30 +13,31 @@ from kivy.properties import NumericProperty, ObjectProperty, StringProperty
 
 class Paddle(Widget):
     score = NumericProperty(0)
+
     def bounce_ball(self, ball):
         if self.collide_widget(ball):
             ball.velocity_x *= -1.1
+
 class Ball(Widget):
-    velocity_x = NumericProperty(0)
-    velocity_y = NumericProperty(0)
     velocity = ObjectProperty(Vector(0, 0))
+
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
+
 class VolleyballGame(Widget):
     ball = ObjectProperty(None)
     player1 = ObjectProperty(None)
     player2 = ObjectProperty(None)
     status_label = ObjectProperty(None)
+
     def __init__(self, **kwargs):
-        super().__init__(self,**kwargs)
+        super().__init__(**kwargs)
         self.ball = Ball()
         self.player1 = Paddle(pos=(10, self.center_y))
         self.player2 = Paddle(pos=(self.width - 30, self.center_y))
         self.status_label = Label(text="Press Start to Play", font_size=24)            
-        self.add_widget(self.ball)
         self.add_widget(self.player1)
         self.add_widget(self.player2)
-        self.add_widget(self.status_label)
 
     def serve_ball(self, velocity=(4, 0)):
         self.ball.velocity_x, self.ball.velocity_y = velocity
@@ -44,16 +45,11 @@ class VolleyballGame(Widget):
 
     def update(self, dt):
         self.ball.move()
-
-        # Bounce off paddles
         self.player1.bounce_ball(self.ball)
         self.player2.bounce_ball(self.ball)
-
-        # Bounce off top and bottom
         if (self.ball.y < 0) or (self.ball.top > self.height):
             self.ball.velocity_y *= -1
 
-        # Score points
         if self.ball.x < self.x:
             self.player2.score += 1
             self.serve_ball(velocity=(4, 0))
@@ -77,13 +73,20 @@ class MenuScreen(BoxLayout):
         self.add_widget(Label(text="Volleyball Game!", font_size=32))
         self.add_widget(Button(text="Start Game", on_press=partial(self.start_game_callback)))
         self.add_widget(Button(text="Quit", on_press=lambda x: App.get_running_app().stop()))
+
 class VolleyballApp(App):
     def build(self):
         self.root_widget = BoxLayout(orientation='vertical')
-        self.menu = MenuScreen(start_game_callback=self.start_game)
+        self.menu = MenuScreen(start_game_callback=self.start_game, open_settings_callback=self.open_settings)
+        self.settings = SettingsScreen(back_callback=self.show_menu)
         self.game = VolleyballGame()
-        self.root_widget.add_widget(self.menu)
+        self.show_menu()
         return self.root_widget
+    
+    def show_menu(self, instance=None):
+        self.root_widget.clear_widgets()
+        self.root_widget.add_widget(self.menu)
+        
     def start_game(self, instance):
         self.root_widget.clear_widgets()
         self.root_widget.add_widget(self.game)
