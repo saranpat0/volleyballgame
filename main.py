@@ -21,7 +21,7 @@ class Ball(Widget):
     velocity = ObjectProperty(Vector(0, 0))
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
-class VollyeballGame(Widget):
+class VolleyballGame(Widget):
     ball = ObjectProperty(None)
     player1 = ObjectProperty(None)
     player2 = ObjectProperty(None)
