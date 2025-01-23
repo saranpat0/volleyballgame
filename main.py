@@ -58,6 +58,18 @@ class Ball(Widget):
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
 
+class Net(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        with self.canvas:
+            Color(0, 0, 0)
+            self.rect = Rectangle(size=(10, self.height), pos=self.pos)
+        self.bind(pos=self.update_graphics_pos, size=self.update_graphics_pos)
+
+    def update_graphics_pos(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
+
 class VolleyballGame(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -73,6 +85,9 @@ class VolleyballGame(Widget):
 
         self.ball = Ball(center=self.center)
         self.add_widget(self.ball)
+
+        self.net = Net(pos=(self.width / 2 - 5, 0))
+        self.add_widget(self.net)
 
         self.player1_score = 0
         self.player2_score = 0
@@ -90,6 +105,8 @@ class VolleyballGame(Widget):
 
         Window.bind(on_key_down=self.on_key_down)
 
+        self.serving_player = 1  # Start with player 1 serving
+
     def _update_bg(self, *args):
         self.bg.size = self.size
         self.bg.pos = self.pos
@@ -99,10 +116,18 @@ class VolleyballGame(Widget):
         self.player2.pos = (self.width - 100, self.height / 2)
         self.ball.center = self.center
         self.score_label.pos = (0, self.height - 50)
+        self.net.pos = (self.width / 2 - 5, 0)
+        self.net.size = (10, self.height)
 
     def serve_ball(self, velocity=(6, 6)):
-        self.ball.center = self.center
-        self.ball.velocity = Vector(*velocity)
+        if self.serving_player == 1:
+            self.ball.center = (self.player1.center_x, self.player1.top + self.ball.height)
+            self.ball.velocity = Vector(*velocity)
+            self.serving_player = 2  # Next serve will be by player 2
+        else:
+            self.ball.center = (self.player2.center_x, self.player2.top + self.ball.height)
+            self.ball.velocity = Vector(-velocity[0], velocity[1])
+            self.serving_player = 1  # Next serve will be by player 1
         print(f"Ball served at {self.ball.center} with velocity {self.ball.velocity}")
 
     def update(self, dt):
@@ -110,21 +135,34 @@ class VolleyballGame(Widget):
         self.player1.move()
         self.player2.move()
 
-        if self.ball.top > self.height or self.ball.y < 0:
+        # Ball collision with top
+        if self.ball.top > self.height:
             self.ball.velocity.y *= -1
 
+        # Ball collision with left and right
+        if self.ball.x < 0 or self.ball.right > self.width:
+            self.ball.velocity.x *= -1
+
+        # Ball collision with bottom
+        if self.ball.y < 0:
+            if self.ball.center_x < self.width / 2:
+                self.player2_score += 1
+            else:
+                self.player1_score += 1
+            self.serve_ball(velocity=(6, 6))
+
+        # Ball collision with paddles
         if self.ball.collide_widget(self.player1) or self.ball.collide_widget(self.player2):
             self.ball.velocity.x *= -1.1
             self.ball.velocity.y *= 1.1
 
-        if self.ball.x < 0:
-            self.player2_score += 1
-            self.serve_ball(velocity=(6, 6))
-        if self.ball.x > self.width:
-            self.player1_score += 1
-            self.serve_ball(velocity=(-6, 6))
-
         self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
+
+        # Prevent players from passing through the net
+        if self.player1.collide_widget(self.net):
+            self.player1.x = self.net.x - self.player1.width
+        if self.player2.collide_widget(self.net):
+            self.player2.x = self.net.right
 
     def on_key_down(self, window, key, *args):
         if key == 119:  # W key
