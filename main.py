@@ -290,9 +290,9 @@ class VolleyballApp(App):
 
         self.start_button = Button(
             text="Start Game",
-            size_hint=(1, None),
-            height=50,
-            pos=(0, 0),
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
             on_press=self.start_game
         )
         root.add_widget(self.start_button)
