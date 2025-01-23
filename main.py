@@ -86,7 +86,11 @@ class VolleyballApp(App):
     def show_menu(self, instance=None):
         self.root_widget.clear_widgets()
         self.root_widget.add_widget(self.menu)
-        
+    
+    def open_settings(self, instance):
+        self.root_widget.clear_widgets()
+        self.root_widget.add_widget(self.settings)
+
     def start_game(self, instance):
         self.root_widget.clear_widgets()
         self.root_widget.add_widget(self.game)
