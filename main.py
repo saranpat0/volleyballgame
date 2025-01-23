@@ -26,6 +26,14 @@ class VolleyballGame(Widget):
     player1 = ObjectProperty(None)
     player2 = ObjectProperty(None)
     status_label = ObjectProperty(None)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ball = Ball()
+        self.player1 = Paddle(pos=(10, self.center_y))
+        self.player2 = Paddle(pos=(self.width - 30, self.center_y))
+        self.add_widget(self.ball)
+        self.add_widget(self.player1)
+        self.add_widget(self.player2)
 
     def serve_ball(self, velocity=(4, 0)):
         self.ball.velocity = Vector(*velocity)
@@ -59,12 +67,12 @@ class VolleyballGame(Widget):
             self.player2.center_y = touch.y
 
 class MenuScreen(BoxLayout):
-    def __init__(self, call_gamestart, **kwargs):
+    def __init__(self, start_game_callback, **kwargs):
         super().__init__(**kwargs)
         self.orientation = 'vertical'
-        self.call_gamestart = call_gamestart
+        self.start_game_callback = start_game_callback
         self.add_widget(Label(text="Volleyball Game!", font_size=32))
-        self.add_widget(Button(text="Start Game", on_press=self.call_gamestart))
+        self.add_widget(Button(text="Start Game", on_press=self.start_game_callback))
         self.add_widget(Button(text="Quit", on_press=lambda x: App.get_running_app().stop()))
 class VolleyballApp(App):
     def build(self):
