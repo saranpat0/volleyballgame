@@ -64,14 +64,27 @@ class Ball(Widget):
 class Net(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.size_hint_y = None
+        self.height = 200  # Default height of the net
+        self.thickness = 10  # Default thickness of the net
         with self.canvas:
             Color(0, 0, 0)
-            self.rect = Rectangle(size=(10, self.height), pos=self.pos)
+            self.rect = Rectangle(size=(self.thickness, self.height), pos=self.pos)
         self.bind(pos=self.update_graphics_pos, size=self.update_graphics_pos)
 
     def update_graphics_pos(self, *args):
         self.rect.pos = self.pos
         self.rect.size = self.size
+
+    def set_height(self, height):
+        self.height = height
+        self.size = (self.thickness, self.height)
+        self.update_graphics_pos()
+
+    def set_thickness(self, thickness):
+        self.thickness = thickness
+        self.size = (self.thickness, self.height)
+        self.update_graphics_pos()
 
 class VolleyballGame(Widget):
     def __init__(self, **kwargs):
@@ -97,9 +110,9 @@ class VolleyballGame(Widget):
 
         self.score_label = Label(
             text="Player 1: 0 | Player 2: 0",
-            size_hint=(1, None),
-            height=50,
-            pos=(0, self.height - 50),
+            size_hint=(None, None),
+            size=(200, 50),
+            pos=(self.width / 2 - 100, self.height - 50),  # Centered at the top
         )
         self.add_widget(self.score_label)
 
@@ -120,9 +133,9 @@ class VolleyballGame(Widget):
         self.player1.pos = (50, self.height / 2)
         self.player2.pos = (self.width - 100, self.height / 2)
         self.ball.center = self.center
-        self.score_label.pos = (0, self.height - 50)
-        self.net.pos = (self.width / 2 - 5, 0)
-        self.net.size = (10, self.height)
+        self.score_label.pos = (self.width / 2 - 100, self.height - 50)  # Centered at the top
+        self.net.pos = (self.width / 2 - self.net.thickness / 2, 0)
+        self.net.set_height(self.height * 2 / 5)  # Set net height to 2/5 of the screen height
 
     def serve_ball(self, velocity=(6, 6)):
         if self.serving_player == 1:
@@ -139,6 +152,9 @@ class VolleyballGame(Widget):
         self.ball.move()
         self.player1.move()
         self.player2.move()
+
+        # Gradually increase the ball's speed
+        self.ball.velocity = self.ball.velocity * 1.001
 
         # Ball collision with top
         if self.ball.top > self.height:
@@ -157,8 +173,26 @@ class VolleyballGame(Widget):
             self.serve_ball(velocity=(6, 6))
 
         # Ball collision with paddles
-        if self.ball.collide_widget(self.player1) or self.ball.collide_widget(self.player2):
+        if self.ball.collide_widget(self.player1):
+            if self.ball.center_x < self.player1.center_x:
+                self.ball.velocity.x = -abs(self.ball.velocity.x)  # Ensure the ball bounces to the left
+                self.ball.right = self.player1.x  # Adjust ball position to the left of the player
+            else:
+                self.ball.velocity.x = abs(self.ball.velocity.x)  # Ensure the ball bounces to the right
+                self.ball.x = self.player1.right  # Adjust ball position to the right of the player
             self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
+        elif self.ball.collide_widget(self.player2):
+            if self.ball.center_x < self.player2.center_x:
+                self.ball.velocity.x = -abs(self.ball.velocity.x)  # Ensure the ball bounces to the left
+                self.ball.right = self.player2.x  # Adjust ball position to the left of the player
+            else:
+                self.ball.velocity.x = abs(self.ball.velocity.x)  # Ensure the ball bounces to the right
+                self.ball.x = self.player2.right  # Adjust ball position to the right of the player
+            self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
+
+        # Ball collision with net
+        if self.ball.collide_widget(self.net):
+            self.ball.velocity.x *= -1  # Invert the x-component of the ball's velocity
 
         self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
 
