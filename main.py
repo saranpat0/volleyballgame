@@ -36,7 +36,7 @@ class VolleyballGame(Widget):
         self.add_widget(self.player2)
 
     def serve_ball(self, velocity=(4, 0)):
-        self.ball.velocity = Vector(*velocity)
+        self.ball.velocity_x, self.ball.velocity_y = velocity
         self.status_label.text = "Game On!"
 
     def update(self, dt):
