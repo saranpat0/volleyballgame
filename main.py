@@ -11,7 +11,7 @@ from kivy.core.window import Window
 class Paddle(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.size = (100, 100)
+        self.size = (100, 150)
         self.velocity = Vector(0, 0)
         self.gravity = -0.5
         self.jump_strength = 10
