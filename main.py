@@ -5,7 +5,7 @@ from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.vector import Vector
 from kivy.clock import Clock
-from kivy.graphics import Rectangle, Color
+from kivy.graphics import Rectangle, Color, Ellipse
 
 class Paddle(Widget):
     def __init__(self, **kwargs):
@@ -14,6 +14,14 @@ class Paddle(Widget):
         self.velocity = Vector(0, 0)
         self.gravity = -0.5
         self.jump_strength = 10
+        with self.canvas:
+            Color(1, 0, 0)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+        self.bind(pos=self.update_graphics_pos, size=self.update_graphics_pos)
+
+    def update_graphics_pos(self, *args):
+        self.rect.pos = self.pos
+        self.rect.size = self.size
 
     def move(self):
         self.velocity.y += self.gravity
@@ -31,6 +39,14 @@ class Ball(Widget):
         super().__init__(**kwargs)
         self.velocity = Vector(6, 6)
         self.size = (30, 30)
+        with self.canvas:
+            Color(1, 1, 0)
+            self.ellipse = Ellipse(size=self.size, pos=self.pos)
+        self.bind(pos=self.update_graphics_pos, size=self.update_graphics_pos)
+
+    def update_graphics_pos(self, *args):
+        self.ellipse.pos = self.pos
+        self.ellipse.size = self.size
 
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
@@ -63,14 +79,22 @@ class VolleyballGame(Widget):
         self.add_widget(self.score_label)
 
         self.bind(size=self._update_bg, pos=self._update_bg)
+        self.bind(size=self._update_positions)
 
     def _update_bg(self, *args):
         self.bg.size = self.size
         self.bg.pos = self.pos
 
+    def _update_positions(self, *args):
+        self.player1.pos = (50, self.height / 2)
+        self.player2.pos = (self.width - 100, self.height / 2)
+        self.ball.center = self.center
+        self.score_label.pos = (0, self.height - 50)
+
     def serve_ball(self, velocity=(6, 6)):
         self.ball.center = self.center
         self.ball.velocity = Vector(*velocity)
+        print(f"Ball served at {self.ball.center} with velocity {self.ball.velocity}")
 
     def update(self, dt):
         self.ball.move()
@@ -99,31 +123,30 @@ class VolleyballGame(Widget):
         else:
             self.player2.jump()
 
-    def start_game(self):
-        self.serve_ball()
-        Clock.unschedule(self.update)
-        Clock.schedule_interval(self.update, 1.0 / 60.0)
-        print("Game started and update scheduled!")
-
 class VolleyballApp(App):
     def build(self):
         root = FloatLayout()
         self.game = VolleyballGame(size=root.size)
         root.add_widget(self.game)
 
-        start_button = Button(
+        self.start_button = Button(
             text="Start Game",
             size_hint=(1, None),
             height=50,
             pos=(0, 0),
-            on_press=lambda x: self.game.start_game()
+            on_press=lambda x: self.start_game()
         )
-        root.add_widget(start_button)
-
-        # Start the game automatically when the app is built
-        self.game.start_game()
+        root.add_widget(self.start_button)
 
         return root
+
+    def start_game(self):
+        self.game.serve_ball()
+        Clock.unschedule(self.game.update)
+        Clock.schedule_interval(self.game.update, 1.0 / 60.0)
+        print("Game started and update scheduled!")
+        if self.start_button.parent:
+            self.start_button.parent.remove_widget(self.start_button)
 
 if __name__ == "__main__":
     VolleyballApp().run()
