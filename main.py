@@ -10,6 +10,7 @@ from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.slider import Slider
 from kivy.core.audio import SoundLoader
+from kivy.uix.image import Image
 
 class Paddle(Widget):
     def __init__(self, **kwargs):
@@ -96,8 +97,9 @@ class VolleyballGame(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         with self.canvas.before:
-            Color(0.5, 0.7, 1)
+            self.bg_image = Image(source='assets/bg.png', allow_stretch=True, keep_ratio=False)
             self.bg = Rectangle(size=self.size, pos=self.pos)
+            self.canvas.add(self.bg_image.canvas)
 
         self.player1 = Paddle(pos=(50, self.height / 2))
         self.add_widget(self.player1)
@@ -162,6 +164,8 @@ class VolleyballGame(Widget):
     def _update_bg(self, *args):
         self.bg.size = self.size
         self.bg.pos = self.pos
+        self.bg_image.size = self.size
+        self.bg_image.pos = self.pos
 
     def _update_positions(self, *args):
         self.player1.pos = (50, self.height / 2)
@@ -318,6 +322,8 @@ class VolleyballGame(Widget):
 class VolleyballApp(App):
     def build(self):
         self.root = FloatLayout()
+        self.bg_image = Image(source='assets/bg.png', allow_stretch=True, keep_ratio=False)
+        self.root.add_widget(self.bg_image)
         self.game = VolleyballGame(size=self.root.size)
         self.sound = SoundLoader.load('assets/Aioli - Andrew Langdon.mp3')
         self.ball_hit_sound = SoundLoader.load('assets/ball_hitted.mp3')
@@ -331,12 +337,9 @@ class VolleyballApp(App):
             self.sound.play()
 
         start_layout = FloatLayout()
+        self.menu_bg_image = Image(source='assets/sky.png', allow_stretch=True, keep_ratio=False)
+        start_layout.add_widget(self.menu_bg_image)
         
-        with start_layout.canvas.before:
-            Color(0.5, 0.7, 1)  # สีพื้นหลัง (สีเทา)
-            self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
-            start_layout.bind(size=self._update_bg, pos=self._update_bg)
-
         box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.start_button = Button(
@@ -374,15 +377,16 @@ class VolleyballApp(App):
     def _update_bg(self, *args):
         self.bg.size = self.root.size
         self.bg.pos = self.root.pos
+        self.bg_image.size = self.root.size
+        self.bg_image.pos = self.root.pos
+        self.menu_bg_image.size = self.root.size
+        self.menu_bg_image.pos = self.root.pos
 
     def show_mode_selection(self, instance):
         mode_layout = FloatLayout()
+        self.menu_bg_image = Image(source='assets/sky.png', allow_stretch=True, keep_ratio=False)
+        mode_layout.add_widget(self.menu_bg_image)
         
-        with mode_layout.canvas.before:
-            Color(0.5, 0.7, 1)  # สีพื้นหลัง (สีฟ้า)
-            self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
-            mode_layout.bind(size=self._update_bg, pos=self._update_bg)
-
         box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.player_vs_cpu_button = Button(
@@ -434,12 +438,9 @@ class VolleyballApp(App):
     def show_settings(self, instance):
         self.root.clear_widgets()
         settings_layout = FloatLayout()
+        self.settings_bg_image = Image(source='assets/sky.png', allow_stretch=True, keep_ratio=False)
+        settings_layout.add_widget(self.settings_bg_image)
         
-        with settings_layout.canvas.before:
-            Color(0.5, 0.7, 1)  # สีพื้นหลัง (สีฟ้า)
-            self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
-            settings_layout.bind(size=self._update_bg, pos=self._update_bg)
-
         box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.volume_label = Label(
