@@ -8,6 +8,7 @@ from kivy.clock import Clock
 from kivy.graphics import Rectangle, Color, Ellipse
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.slider import Slider
 from kivy.core.audio import SoundLoader
 
 class Paddle(Widget):
@@ -303,7 +304,7 @@ class VolleyballApp(App):
         start_layout = FloatLayout()
         
         with start_layout.canvas.before:
-            Color(0.5, 0.5, 0.5, 1)  # สีพื้นหลัง (สีเทา)
+            Color(0.5, 0.7, 1)  # สีพื้นหลัง (สีเทา)
             self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
             start_layout.bind(size=self._update_bg, pos=self._update_bg)
 
@@ -317,6 +318,15 @@ class VolleyballApp(App):
             on_press=self.show_mode_selection
         )
         box_layout.add_widget(self.start_button)
+
+        self.settings_button = Button(
+            text="Settings",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            on_press=self.show_settings
+        )
+        box_layout.add_widget(self.settings_button)
 
         self.quit_button = Button(
             text="Quit",
@@ -391,6 +401,52 @@ class VolleyballApp(App):
         message_layout.add_widget(self.back_button)
 
         self.root.add_widget(message_layout)
+
+    def show_settings(self, instance):
+        self.root.clear_widgets()
+        settings_layout = FloatLayout()
+        
+        with settings_layout.canvas.before:
+            Color(0.5, 0.7, 1)  # สีพื้นหลัง (สีฟ้า)
+            self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
+            settings_layout.bind(size=self._update_bg, pos=self._update_bg)
+
+        box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
+        
+        self.volume_label = Label(
+            text="Volume",
+            size_hint=(None, None),
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        box_layout.add_widget(self.volume_label)
+
+        self.volume_slider = Slider(
+            min=0,
+            max=1,
+            value=self.sound.volume if self.sound else 0.5,
+            size_hint=(None, None),
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        self.volume_slider.bind(value=self.on_volume_change)
+        box_layout.add_widget(self.volume_slider)
+
+        self.back_button = Button(
+            text="Back",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            on_press=lambda x: self.show_start_screen()
+        )
+        box_layout.add_widget(self.back_button)
+
+        settings_layout.add_widget(box_layout)
+        self.root.add_widget(settings_layout)
+
+    def on_volume_change(self, instance, value):
+        if self.sound:
+            self.sound.volume = value
 
     def start_game(self, instance):
         if self.sound:
