@@ -294,16 +294,22 @@ class VolleyballGame(Widget):
             self.keys_pressed.discard('right')
 
     def replay_game(self, instance):
+        self.reset_game()
+        self.serve_ball(velocity=(6, 6))
+        Clock.schedule_interval(self.update, 1.0 / 60.0)  # Restart the game
+
+    def back_to_main_menu(self, instance):
+        self.reset_game()
+        App.get_running_app().show_start_screen()
+
+    def reset_game(self):
         self.player1_score = 0
         self.player2_score = 0
         self.win_label.text = ""
         self.replay_button.opacity = 0  # Hide the replay button
         self.back_to_menu_button.opacity = 0  # Hide the back to menu button
-        self.serve_ball(velocity=(6, 6))
-        Clock.schedule_interval(self.update, 1.0 / 60.0)  # Restart the game
-
-    def back_to_main_menu(self, instance):
-        App.get_running_app().show_start_screen()
+        self.ball.center = self.center
+        self.ball.velocity = Vector(6, 6)
 
 class VolleyballApp(App):
     def build(self):
