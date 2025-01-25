@@ -7,6 +7,7 @@ from kivy.vector import Vector
 from kivy.clock import Clock
 from kivy.graphics import Rectangle, Color, Ellipse
 from kivy.core.window import Window
+from kivy.uix.boxlayout import BoxLayout
 
 class Paddle(Widget):
     def __init__(self, **kwargs):
@@ -60,6 +61,9 @@ class Ball(Widget):
 
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
+
+    def increase_speed(self, factor=1.01):
+        self.velocity = self.velocity * factor
 
 class Net(Widget):
     def __init__(self, **kwargs):
@@ -174,7 +178,7 @@ class VolleyballGame(Widget):
         self.player2.move()
 
         # Gradually increase the ball's speed
-        self.ball.velocity = self.ball.velocity * 1.001
+        self.ball.increase_speed()
 
         # Ball collision with top
         if self.ball.top > self.height:
@@ -288,6 +292,9 @@ class VolleyballApp(App):
         self.game = VolleyballGame(size=root.size)
         root.add_widget(self.game)
 
+        # Create a layout for the start screen
+        start_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
+        
         self.start_button = Button(
             text="Start Game",
             size_hint=(None, None),
@@ -295,7 +302,18 @@ class VolleyballApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             on_press=self.start_game
         )
-        root.add_widget(self.start_button)
+        start_layout.add_widget(self.start_button)
+
+        self.quit_button = Button(
+            text="Quit",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            on_press=self.quit_game
+        )
+        start_layout.add_widget(self.quit_button)
+
+        root.add_widget(start_layout)
 
         return root
 
@@ -305,7 +323,10 @@ class VolleyballApp(App):
         Clock.schedule_interval(self.game.update, 1.0 / 60.0)
         print("Game started and update scheduled!")
         if self.start_button.parent:
-            self.start_button.parent.remove_widget(self.start_button)
+            self.start_button.parent.parent.remove_widget(self.start_button.parent)
+
+    def quit_game(self, instance):
+        App.get_running_app().stop()
 
 if __name__ == "__main__":
     VolleyballApp().run()
