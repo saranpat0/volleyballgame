@@ -321,6 +321,7 @@ class VolleyballApp(App):
         self.game = VolleyballGame(size=self.root.size)
         self.sound = SoundLoader.load('assets/Aioli - Andrew Langdon.mp3')
         self.ball_hit_sound = SoundLoader.load('assets/ball_hitted.mp3')
+        self.ball_hit_sound.volume = 0.5  # Default volume for ball hit sound
         self.show_start_screen()
         return self.root
 
@@ -442,7 +443,7 @@ class VolleyballApp(App):
         box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.volume_label = Label(
-            text="Volume",
+            text="Background Music Volume",
             size_hint=(None, None),
             size=(200, 50),
             pos_hint={'center_x': 0.5, 'center_y': 0.5}
@@ -460,6 +461,25 @@ class VolleyballApp(App):
         self.volume_slider.bind(value=self.on_volume_change)
         box_layout.add_widget(self.volume_slider)
 
+        self.ball_hit_volume_label = Label(
+            text="Ball Hit Sound Volume",
+            size_hint=(None, None),
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        box_layout.add_widget(self.ball_hit_volume_label)
+
+        self.ball_hit_volume_slider = Slider(
+            min=0,
+            max=1,
+            value=self.ball_hit_sound.volume if self.ball_hit_sound else 0.5,
+            size_hint=(None, None),
+            size=(200, 50),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        self.ball_hit_volume_slider.bind(value=self.on_ball_hit_volume_change)
+        box_layout.add_widget(self.ball_hit_volume_slider)
+
         self.back_button = Button(
             text="Back",
             size_hint=(None, None),
@@ -475,6 +495,10 @@ class VolleyballApp(App):
     def on_volume_change(self, instance, value):
         if self.sound:
             self.sound.volume = value
+
+    def on_ball_hit_volume_change(self, instance, value):
+        if self.ball_hit_sound:
+            self.ball_hit_sound.volume = value
 
     def start_game(self, instance):
         if self.sound:
