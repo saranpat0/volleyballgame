@@ -140,6 +140,16 @@ class VolleyballGame(Widget):
         self.replay_button.opacity = 0  # Hide the button initially
         self.add_widget(self.replay_button)
 
+        self.back_to_menu_button = Button(
+            text="Back to Main Menu",
+            size_hint=(None, None),
+            size=(200, 50),
+            pos=(self.width / 2 - 100, self.height / 2 - 160),
+            on_press=self.back_to_main_menu,
+        )
+        self.back_to_menu_button.opacity = 0  # Hide the button initially
+        self.add_widget(self.back_to_menu_button)
+
         self.bind(size=self._update_bg, pos=self._update_bg)
         self.bind(size=self._update_positions)
 
@@ -160,6 +170,7 @@ class VolleyballGame(Widget):
         self.score_label.pos = (self.width / 2 - 100, self.height - 50)  # Centered at the top
         self.win_label.pos = (self.width / 2 - 100, self.height / 2)  # Centered in the middle
         self.replay_button.pos = (self.width / 2 - 50, self.height / 2 - 100)
+        self.back_to_menu_button.pos = (self.width / 2 - 100, self.height / 2 - 160)
         self.net.pos = (self.width / 2 - self.net.thickness / 2, 0)
         self.net.set_height(self.height * 2 / 5)  # Set net height to 2/5 of the screen height
 
@@ -202,10 +213,12 @@ class VolleyballGame(Widget):
         if self.player1_score >= 7:
             self.win_label.text = "Player 1 Wins!"
             self.replay_button.opacity = 1  # Show the replay button
+            self.back_to_menu_button.opacity = 1  # Show the back to menu button
             Clock.unschedule(self.update)  # Stop the game
         elif self.player2_score >= 7:
             self.win_label.text = "Player 2 Wins!"
             self.replay_button.opacity = 1  # Show the replay button
+            self.back_to_menu_button.opacity = 1  # Show the back to menu button
             Clock.unschedule(self.update)  # Stop the game
 
         # Ball collision with paddles
@@ -285,8 +298,12 @@ class VolleyballGame(Widget):
         self.player2_score = 0
         self.win_label.text = ""
         self.replay_button.opacity = 0  # Hide the replay button
+        self.back_to_menu_button.opacity = 0  # Hide the back to menu button
         self.serve_ball(velocity=(6, 6))
         Clock.schedule_interval(self.update, 1.0 / 60.0)  # Restart the game
+
+    def back_to_main_menu(self, instance):
+        App.get_running_app().show_start_screen()
 
 class VolleyballApp(App):
     def build(self):
