@@ -98,7 +98,7 @@ class VolleyballGame(Widget):
         with self.canvas:
             Color(0.5, 0.5, 0.5, 1)  # Gray color
             self.platform = Rectangle(size=(self.width, 50), pos=(0, 0))
-        self.bind(size=self._update_rect, pos=self._update_rect)
+            self.bind(size=self._update_rect, pos=self._update_rect)
         with self.canvas.before:
             self.bg_image = Image(source='assets/bg.png', allow_stretch=True, keep_ratio=False)
             self.bg = Rectangle(size=self.size, pos=self.pos)
