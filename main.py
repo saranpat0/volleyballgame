@@ -288,11 +288,12 @@ class VolleyballGame(Widget):
 
 class VolleyballApp(App):
     def build(self):
-        root = FloatLayout()
-        self.game = VolleyballGame(size=root.size)
-        root.add_widget(self.game)
+        self.root = FloatLayout()
+        self.game = VolleyballGame(size=self.root.size)
+        self.show_start_screen()
+        return self.root
 
-        # Create a layout for the start screen
+    def show_start_screen(self, *args):
         start_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.start_button = Button(
@@ -300,7 +301,7 @@ class VolleyballApp(App):
             size_hint=(None, None),
             size=(200, 100),
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            on_press=self.start_game
+            on_press=self.show_mode_selection
         )
         start_layout.add_widget(self.start_button)
 
@@ -313,17 +314,63 @@ class VolleyballApp(App):
         )
         start_layout.add_widget(self.quit_button)
 
-        root.add_widget(start_layout)
+        self.root.clear_widgets()
+        self.root.add_widget(start_layout)
 
-        return root
+    def show_mode_selection(self, instance):
+        mode_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
+        
+        self.player_vs_cpu_button = Button(
+            text="Player 1 vs CPU",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            on_press=self.show_ai_message
+        )
+        mode_layout.add_widget(self.player_vs_cpu_button)
+
+        self.player_vs_player_button = Button(
+            text="Player 1 vs Player 2",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            on_press=self.start_game
+        )
+        mode_layout.add_widget(self.player_vs_player_button)
+
+        self.root.clear_widgets()
+        self.root.add_widget(mode_layout)
+
+    def show_ai_message(self, instance):
+        self.root.clear_widgets()
+        message_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
+        
+        self.message_label = Label(
+            text="Sorry, I haven't done AI yet",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5}
+        )
+        message_layout.add_widget(self.message_label)
+
+        self.back_button = Button(
+            text="Back",
+            size_hint=(None, None),
+            size=(200, 100),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            on_press=lambda x: self.show_start_screen()
+        )
+        message_layout.add_widget(self.back_button)
+
+        self.root.add_widget(message_layout)
 
     def start_game(self, instance):
         self.game.serve_ball()
         Clock.unschedule(self.game.update)
         Clock.schedule_interval(self.game.update, 1.0 / 60.0)
         print("Game started and update scheduled!")
-        if self.start_button.parent:
-            self.start_button.parent.parent.remove_widget(self.start_button.parent)
+        self.root.clear_widgets()
+        self.root.add_widget(self.game)
 
     def quit_game(self, instance):
         App.get_running_app().stop()
