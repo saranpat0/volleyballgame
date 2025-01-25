@@ -13,7 +13,7 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.image import Image
 
 class Paddle(Widget):
-    def __init__(self, **kwargs):
+    def __init__(self, image_source, **kwargs):
         super().__init__(**kwargs)
         self.size = (100, 150)
         self.velocity = Vector(0, 0)
@@ -21,13 +21,12 @@ class Paddle(Widget):
         self.jump_strength = 10
         self.speed = 7  # Speed of the player
         with self.canvas:
-            Color(1, 0, 0)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
+            self.image = Image(source=image_source, size=self.size, pos=self.pos)
         self.bind(pos=self.update_graphics_pos, size=self.update_graphics_pos)
 
     def update_graphics_pos(self, *args):
-        self.rect.pos = self.pos
-        self.rect.size = self.size
+        self.image.pos = self.pos
+        self.image.size = self.size
 
     def move(self):
         self.velocity.y += self.gravity
@@ -96,15 +95,19 @@ class Net(Widget):
 class VolleyballGame(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        with self.canvas:
+            Color(0.5, 0.5, 0.5, 1)  # Gray color
+            self.platform = Rectangle(size=(self.width, 50), pos=(0, 0))
+        self.bind(size=self._update_rect, pos=self._update_rect)
         with self.canvas.before:
             self.bg_image = Image(source='assets/bg.png', allow_stretch=True, keep_ratio=False)
             self.bg = Rectangle(size=self.size, pos=self.pos)
             self.canvas.add(self.bg_image.canvas)
 
-        self.player1 = Paddle(pos=(50, self.height / 2))
+        self.player1 = Paddle(image_source='assets/player1.png', pos=(50, self.height / 2))
         self.add_widget(self.player1)
 
-        self.player2 = Paddle(pos=(self.width - 100, self.height / 2))
+        self.player2 = Paddle(image_source='assets/player2.png', pos=(self.width - 100, self.height / 2))
         self.add_widget(self.player2)
 
         self.ball = Ball(center=self.center)
@@ -160,6 +163,9 @@ class VolleyballGame(Widget):
 
         self.keys_pressed = set()
         self.serving_player = 1  # Start with player 1 serving
+    def _update_rect(self, *args):
+        self.platform.size = (self.width, 50)
+        self.platform.pos = (0, 0)
 
     def _update_bg(self, *args):
         self.bg.size = self.size
