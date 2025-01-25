@@ -8,6 +8,7 @@ from kivy.clock import Clock
 from kivy.graphics import Rectangle, Color, Ellipse
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
+from kivy.core.audio import SoundLoader
 
 class Paddle(Widget):
     def __init__(self, **kwargs):
@@ -290,11 +291,23 @@ class VolleyballApp(App):
     def build(self):
         self.root = FloatLayout()
         self.game = VolleyballGame(size=self.root.size)
+        self.sound = SoundLoader.load('assets/Aioli - Andrew Langdon.mp3')
         self.show_start_screen()
         return self.root
 
     def show_start_screen(self, *args):
-        start_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
+        if self.sound:
+            self.sound.loop = True
+            self.sound.play()
+
+        start_layout = FloatLayout()
+        
+        with start_layout.canvas.before:
+            Color(0.5, 0.5, 0.5, 1)  # สีพื้นหลัง (สีเทา)
+            self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
+            start_layout.bind(size=self._update_bg, pos=self._update_bg)
+
+        box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.start_button = Button(
             text="Start Game",
@@ -303,7 +316,7 @@ class VolleyballApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             on_press=self.show_mode_selection
         )
-        start_layout.add_widget(self.start_button)
+        box_layout.add_widget(self.start_button)
 
         self.quit_button = Button(
             text="Quit",
@@ -312,13 +325,26 @@ class VolleyballApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             on_press=self.quit_game
         )
-        start_layout.add_widget(self.quit_button)
+        box_layout.add_widget(self.quit_button)
+
+        start_layout.add_widget(box_layout)
 
         self.root.clear_widgets()
         self.root.add_widget(start_layout)
 
+    def _update_bg(self, *args):
+        self.bg.size = self.root.size
+        self.bg.pos = self.root.pos
+
     def show_mode_selection(self, instance):
-        mode_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
+        mode_layout = FloatLayout()
+        
+        with mode_layout.canvas.before:
+            Color(0.5, 0.7, 1)  # สีพื้นหลัง (สีฟ้า)
+            self.bg = Rectangle(size=self.root.size, pos=self.root.pos)
+            mode_layout.bind(size=self._update_bg, pos=self._update_bg)
+
+        box_layout = BoxLayout(orientation='vertical', spacing=10, padding=50)
         
         self.player_vs_cpu_button = Button(
             text="Player 1 vs CPU",
@@ -327,7 +353,7 @@ class VolleyballApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             on_press=self.show_ai_message
         )
-        mode_layout.add_widget(self.player_vs_cpu_button)
+        box_layout.add_widget(self.player_vs_cpu_button)
 
         self.player_vs_player_button = Button(
             text="Player 1 vs Player 2",
@@ -336,7 +362,9 @@ class VolleyballApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             on_press=self.start_game
         )
-        mode_layout.add_widget(self.player_vs_player_button)
+        box_layout.add_widget(self.player_vs_player_button)
+
+        mode_layout.add_widget(box_layout)
 
         self.root.clear_widgets()
         self.root.add_widget(mode_layout)
@@ -365,10 +393,11 @@ class VolleyballApp(App):
         self.root.add_widget(message_layout)
 
     def start_game(self, instance):
+        if self.sound:
+            self.sound.stop()
         self.game.serve_ball()
         Clock.unschedule(self.game.update)
         Clock.schedule_interval(self.game.update, 1.0 / 60.0)
-        print("Game started and update scheduled!")
         self.root.clear_widgets()
         self.root.add_widget(self.game)
 
