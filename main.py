@@ -64,14 +64,14 @@ class Ball(Widget):
     def move(self):
         self.pos = Vector(*self.velocity) + self.pos
 
-    def increase_speed(self, factor=1.01):
+    def increase_speed(self, factor=1.001):
         self.velocity = self.velocity * factor
 
 class Net(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
-        self.height = 200  # Default height of the net
+        self.height = 180  # Default height of the net
         self.thickness = 10  # Default thickness of the net
         with self.canvas:
             Color(0, 0, 0)
@@ -196,10 +196,12 @@ class VolleyballGame(Widget):
         # Ball collision with top
         if self.ball.top > self.height:
             self.ball.velocity.y *= -1
+            App.get_running_app().ball_hit_sound.play()
 
         # Ball collision with left and right
         if self.ball.x < 0 or self.ball.right > self.width:
             self.ball.velocity.x *= -1
+            App.get_running_app().ball_hit_sound.play()
 
         # Ball collision with bottom
         if self.ball.y < 0:
@@ -230,6 +232,7 @@ class VolleyballGame(Widget):
                 self.ball.velocity.x = abs(self.ball.velocity.x)  # Ensure the ball bounces to the right
                 self.ball.x = self.player1.right  # Adjust ball position to the right of the player
             self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
+            App.get_running_app().ball_hit_sound.play()       
         elif self.ball.collide_widget(self.player2):
             if self.ball.center_x < self.player2.center_x:
                 self.ball.velocity.x = -abs(self.ball.velocity.x)  # Ensure the ball bounces to the left
@@ -238,11 +241,12 @@ class VolleyballGame(Widget):
                 self.ball.velocity.x = abs(self.ball.velocity.x)  # Ensure the ball bounces to the right
                 self.ball.x = self.player2.right  # Adjust ball position to the right of the player
             self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
+            App.get_running_app().ball_hit_sound.play()
 
         # Ball collision with net
         if self.ball.collide_widget(self.net):
             self.ball.velocity.x *= -1  # Invert the x-component of the ball's velocity
-
+            App.get_running_app().ball_hit_sound.play()
         self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
 
         # Prevent players from passing through the net
@@ -316,6 +320,7 @@ class VolleyballApp(App):
         self.root = FloatLayout()
         self.game = VolleyballGame(size=self.root.size)
         self.sound = SoundLoader.load('assets/Aioli - Andrew Langdon.mp3')
+        self.ball_hit_sound = SoundLoader.load('assets/ball_hitted.mp3')
         self.show_start_screen()
         return self.root
 
