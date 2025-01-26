@@ -19,7 +19,7 @@ class Paddle(Widget):
         self.velocity = Vector(0, 0)
         self.gravity = -0.5
         self.jump_strength = 10
-        self.speed = 7  # Speed of the player
+        self.speed = 7  # ความเร็วของผู้เล่น
         with self.canvas:
             self.image = Image(source=image_source, size=self.size, pos=self.pos)
         self.bind(pos=self.update_graphics_pos, size=self.update_graphics_pos)
@@ -40,11 +40,11 @@ class Paddle(Widget):
             self.velocity.y = self.jump_strength
 
     def move_left(self):
-        if self.x - self.speed >= 0:  # Prevent moving out of the left boundary
+        if self.x - self.speed >= 0:  # ป้องกันไม่ให้เคลื่อนที่ออกนอกขอบด้านซ้าย
             self.x -= self.speed
 
     def move_right(self):
-        if self.right + self.speed <= self.parent.width:  # Prevent moving out of the right boundary
+        if self.right + self.speed <= self.parent.width:  # ป้องกันไม่ให้เคลื่อนที่ออกนอกขอบด้านขวา
             self.x += self.speed
 
 class Ball(Widget):
@@ -71,8 +71,8 @@ class Net(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
-        self.height = 180  # Default height of the net
-        self.thickness = 10  # Default thickness of the net
+        self.height = 180  # ความสูงของตาข่าย
+        self.thickness = 10  # ความหนาของตาข่าย
         with self.canvas:
             Color(0, 0, 0)
             self.rect = Rectangle(size=(self.thickness, self.height), pos=self.pos)
@@ -96,7 +96,7 @@ class VolleyballGame(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         with self.canvas:
-            Color(0.5, 0.5, 0.5, 1)  # Gray color
+            Color(0.5, 0.5, 0.5, 1) 
             self.platform = Rectangle(size=(self.width, 50), pos=(0, 0))
             self.bind(size=self._update_rect, pos=self._update_rect)
         with self.canvas.before:
@@ -123,7 +123,7 @@ class VolleyballGame(Widget):
             text="Player 1: 0 | Player 2: 0",
             size_hint=(None, None),
             size=(200, 50),
-            pos=(self.width / 2 - 100, self.height - 50),  # Centered at the top
+            pos=(self.width / 2 - 100, self.height - 50),  # ตำแหน่งคะแนน
         )
         self.add_widget(self.score_label)
 
@@ -131,7 +131,7 @@ class VolleyballGame(Widget):
             text="",
             size_hint=(None, None),
             size=(200, 50),
-            pos=(self.width / 2 - 100, self.height / 2),  # Centered in the middle
+            pos=(self.width / 2 - 100, self.height / 2),  # ตำแหน่งข้อความชนะ
         )
         self.add_widget(self.win_label)
 
@@ -142,7 +142,7 @@ class VolleyballGame(Widget):
             pos=(self.width / 2 - 50, self.height / 2 - 100),
             on_press=self.replay_game,
         )
-        self.replay_button.opacity = 0  # Hide the button initially
+        self.replay_button.opacity = 0  # ซ่อนปุ่มในตอนแรก
         self.add_widget(self.replay_button)
 
         self.back_to_menu_button = Button(
@@ -152,7 +152,7 @@ class VolleyballGame(Widget):
             pos=(self.width / 2 - 100, self.height / 2 - 160),
             on_press=self.back_to_main_menu,
         )
-        self.back_to_menu_button.opacity = 0  # Hide the button initially
+        self.back_to_menu_button.opacity = 0  # ซ่อนปุ่มในตอนแรก
         self.add_widget(self.back_to_menu_button)
 
         self.bind(size=self._update_bg, pos=self._update_bg)
@@ -162,7 +162,7 @@ class VolleyballGame(Widget):
         Window.bind(on_key_up=self.on_key_up)
 
         self.keys_pressed = set()
-        self.serving_player = 1  # Start with player 1 serving
+        self.serving_player = 1  # ผู้ที่จะเริ่มเสิร์ฟ
     def _update_rect(self, *args):
         self.platform.size = (self.width, 50)
         self.platform.pos = (0, 0)
@@ -177,22 +177,22 @@ class VolleyballGame(Widget):
         self.player1.pos = (50, self.height / 2)
         self.player2.pos = (self.width - 100, self.height / 2)
         self.ball.center = self.center
-        self.score_label.pos = (self.width / 2 - 100, self.height - 50)  # Centered at the top
-        self.win_label.pos = (self.width / 2 - 100, self.height / 2)  # Centered in the middle
+        self.score_label.pos = (self.width / 2 - 100, self.height - 50)  
+        self.win_label.pos = (self.width / 2 - 100, self.height / 2) 
         self.replay_button.pos = (self.width / 2 - 50, self.height / 2 - 100)
         self.back_to_menu_button.pos = (self.width / 2 - 100, self.height / 2 - 160)
         self.net.pos = (self.width / 2 - self.net.thickness / 2, 0)
-        self.net.set_height(self.height * 2 / 5)  # Set net height to 2/5 of the screen height
+        self.net.set_height(self.height * 2 / 5)  #ความสูงของตาข่ายเป็น 2/5 ของความสูงหน้าจอ
 
-    def serve_ball(self, velocity=(6, 6)):
+    def serve_ball(self, velocity=(6, 6)):#การสลับกันเสิร์ฟ
         if self.serving_player == 1:
             self.ball.center = (self.player1.center_x, self.player1.top + self.ball.height)
             self.ball.velocity = Vector(*velocity)
-            self.serving_player = 2  # Next serve will be by player 2
+            self.serving_player = 2  #เสิร์ฟครั้งต่อไปจะเป็นผู้เล่น 2
         else:
             self.ball.center = (self.player2.center_x, self.player2.top + self.ball.height)
             self.ball.velocity = Vector(-velocity[0], velocity[1])
-            self.serving_player = 1  # Next serve will be by player 1
+            self.serving_player = 1  #เสิร์ฟครั้งต่อไปจะเป็นผู้เล่น 1
         print(f"Ball served at {self.ball.center} with velocity {self.ball.velocity}")
 
     def update(self, dt):
@@ -200,20 +200,20 @@ class VolleyballGame(Widget):
         self.player1.move()
         self.player2.move()
 
-        # Gradually increase the ball's speed
+        # เพิ่มความเร็วของลูกบอล
         self.ball.increase_speed()
 
-        # Ball collision with top
+        # การชนของลูกบอลกับด้านบน
         if self.ball.top > self.height:
             self.ball.velocity.y *= -1
             App.get_running_app().ball_hit_sound.play()
 
-        # Ball collision with left and right
+        # ลูกบอลชนกับด้านซ้ายและขวา
         if self.ball.x < 0 or self.ball.right > self.width:
             self.ball.velocity.x *= -1
             App.get_running_app().ball_hit_sound.play()
 
-        # Ball collision with bottom
+        # ลูกบอลชนกับด้านล่าง
         if self.ball.y < 0:
             if self.ball.center_x < self.width / 2:
                 self.player2_score += 1
@@ -221,51 +221,51 @@ class VolleyballGame(Widget):
                 self.player1_score += 1
             self.serve_ball(velocity=(6, 6))
 
-        # Check for win condition
+        # ตรวจสอบเงื่อนไขการชนะ
         if self.player1_score >= 7:
             self.win_label.text = "Player 1 Wins!"
-            self.replay_button.opacity = 1  # Show the replay button
-            self.back_to_menu_button.opacity = 1  # Show the back to menu button
-            Clock.unschedule(self.update)  # Stop the game
+            self.replay_button.opacity = 1  # แสดงปุ่ม replay
+            self.back_to_menu_button.opacity = 1  # แสดงปุ่ม back to menu
+            Clock.unschedule(self.update)  # หยุดเกม
         elif self.player2_score >= 7:
             self.win_label.text = "Player 2 Wins!"
-            self.replay_button.opacity = 1  # Show the replay button
-            self.back_to_menu_button.opacity = 1  # Show the back to menu button
-            Clock.unschedule(self.update)  # Stop the game
+            self.replay_button.opacity = 1  # แสดงปุ่ม replay
+            self.back_to_menu_button.opacity = 1  # แสดงปุ่ม back to menu
+            Clock.unschedule(self.update)  # หยุดเกม
 
-        # Ball collision with paddles
+        # การชนของลูกบอลกับผู้เล่น
         if self.ball.collide_widget(self.player1):
             if self.ball.center_x < self.player1.center_x:
-                self.ball.velocity.x = -abs(self.ball.velocity.x)  # Ensure the ball bounces to the left
-                self.ball.right = self.player1.x  # Adjust ball position to the left of the player
+                self.ball.velocity.x = -abs(self.ball.velocity.x)  # ทำให้ลูกบอลกระเด็นไปทางซ้าย
+                self.ball.right = self.player1.x  # ปรับตำแหน่งลูกบอลไปทางซ้ายของผู้เล่น
             else:
-                self.ball.velocity.x = abs(self.ball.velocity.x)  # Ensure the ball bounces to the right
-                self.ball.x = self.player1.right  # Adjust ball position to the right of the player
-            self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
+                self.ball.velocity.x = abs(self.ball.velocity.x)  # ทำให้ลูกบอลกระเด็นไปทางขวา
+                self.ball.x = self.player1.right  # ปรับตำแหน่งลูกบอลไปทางขวาของผู้เล่น
+            self.ball.velocity.y = abs(self.ball.velocity.y)  # ทำให้ลูกบอลกระเด็นขึ้น
             App.get_running_app().ball_hit_sound.play()       
         elif self.ball.collide_widget(self.player2):
             if self.ball.center_x < self.player2.center_x:
-                self.ball.velocity.x = -abs(self.ball.velocity.x)  # Ensure the ball bounces to the left
-                self.ball.right = self.player2.x  # Adjust ball position to the left of the player
+                self.ball.velocity.x = -abs(self.ball.velocity.x)  # ทำให้ลูกบอลกระเด็นไปทางซ้าย
+                self.ball.right = self.player2.x  # ปรับตำแหน่งลูกบอลไปทางซ้ายของผู้เล่น
             else:
-                self.ball.velocity.x = abs(self.ball.velocity.x)  # Ensure the ball bounces to the right
-                self.ball.x = self.player2.right  # Adjust ball position to the right of the player
-            self.ball.velocity.y = abs(self.ball.velocity.y)  # Ensure the ball bounces upwards
+                self.ball.velocity.x = abs(self.ball.velocity.x)  # ทำให้ลูกบอลกระเด็นไปทางขวา
+                self.ball.x = self.player2.right  # ปรับตำแหน่งลูกบอลไปทางขวาของผู้เล่น
+            self.ball.velocity.y = abs(self.ball.velocity.y)  # ทำให้ลูกบอลกระเด็นขึ้น
             App.get_running_app().ball_hit_sound.play()
 
-        # Ball collision with net
+        # การชนของลูกบอลกับตาข่าย
         if self.ball.collide_widget(self.net):
-            self.ball.velocity.x *= -1  # Invert the x-component of the ball's velocity
+            self.ball.velocity.x *= -1  # กลับทิศทางของความเร็วในแนว x ของลูกบอล
             App.get_running_app().ball_hit_sound.play()
         self.score_label.text = f"Player 1: {self.player1_score} | Player 2: {self.player2_score}"
 
-        # Prevent players from passing through the net
+        # ทำให้ผู้เล่นผ่านตาข่ายไม่ได้
         if self.player1.collide_widget(self.net):
             self.player1.x = self.net.x - self.player1.width
         if self.player2.collide_widget(self.net):
             self.player2.x = self.net.right
 
-        # Update player movements based on keys pressed
+        # อัปเดตการเคลื่อนไหวของผู้เล่นตามปุ่มที่กด
         if 'w' in self.keys_pressed:
             self.player1.jump()
         if 'a' in self.keys_pressed:
@@ -280,37 +280,37 @@ class VolleyballGame(Widget):
             self.player2.move_right()
 
     def on_key_down(self, window, key, *args):
-        if key == 119:  # W key
+        if key == 119:  # ปุ่ม W
             self.keys_pressed.add('w')
-        elif key == 97:  # A key
+        elif key == 97:  # ปุ่ม A
             self.keys_pressed.add('a')
-        elif key == 100:  # D key
+        elif key == 100:  # ปุ่ม D
             self.keys_pressed.add('d')
-        elif key == 273:  # Up arrow key
+        elif key == 273:  # ปุ่มลูกศรขึ้น
             self.keys_pressed.add('up')
-        elif key == 276:  # Left arrow key
+        elif key == 276:  # ปุ่มลูกศรซ้าย
             self.keys_pressed.add('left')
-        elif key == 275:  # Right arrow key
+        elif key == 275:  # ปุ่มลูกศรขวา
             self.keys_pressed.add('right')
 
     def on_key_up(self, window, key, *args):
-        if key == 119:  # W key
+        if key == 119:  # ปุ่ม W
             self.keys_pressed.discard('w')
-        elif key == 97:  # A key
+        elif key == 97:  # ปุ่ม A
             self.keys_pressed.discard('a')
-        elif key == 100:  # D key
+        elif key == 100:  # ปุ่ม D
             self.keys_pressed.discard('d')
-        elif key == 273:  # Up arrow key
+        elif key == 273:  # ปุ่มลูกศรขึ้น
             self.keys_pressed.discard('up')
-        elif key == 276:  # Left arrow key
+        elif key == 276:  # ปุ่มลูกศรซ้าย
             self.keys_pressed.discard('left')
-        elif key == 275:  # Right arrow key
+        elif key == 275:  # ปุ่มลูกศรขวา
             self.keys_pressed.discard('right')
 
     def replay_game(self, instance):
         self.reset_game()
         self.serve_ball(velocity=(6, 6))
-        Clock.schedule_interval(self.update, 1.0 / 60.0)  # Restart the game
+        Clock.schedule_interval(self.update, 1.0 / 60.0)  # เริ่มเกมใหม่
 
     def back_to_main_menu(self, instance):
         self.reset_game()
@@ -320,8 +320,8 @@ class VolleyballGame(Widget):
         self.player1_score = 0
         self.player2_score = 0
         self.win_label.text = ""
-        self.replay_button.opacity = 0  # Hide the replay button
-        self.back_to_menu_button.opacity = 0  # Hide the back to menu button
+        self.replay_button.opacity = 0  # ซ่อนปุ่ม replay
+        self.back_to_menu_button.opacity = 0  # ซ่อนปุ่ม back to menu
         self.ball.center = self.center
         self.ball.velocity = Vector(6, 6)
 
@@ -333,7 +333,7 @@ class VolleyballApp(App):
         self.game = VolleyballGame(size=self.root.size)
         self.sound = SoundLoader.load('assets/Aioli - Andrew Langdon.mp3')
         self.ball_hit_sound = SoundLoader.load('assets/ball_hitted.mp3')
-        self.ball_hit_sound.volume = 0.5  # Default volume for ball hit sound
+        self.ball_hit_sound.volume = 0.5  # ระดับเสียงเริ่มต้น
         self.show_start_screen()
         return self.root
 
